@@ -2,7 +2,10 @@
 <html>
  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
 
-    <head><script src="jquery-3.3.1.min.js"></script>
+    <head>
+    
+    <link href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet'>
+    <script src="jquery-3.3.1.min.js"></script>
 
     </head>
     <script src="https://apis.google.com/js/platform.js" async defer></script>
@@ -33,7 +36,7 @@
         // Check to see if you are logged in
         firebase.auth().onAuthStateChanged(function(user) {
             if (user == null) {
-                alert("Not logged in.");
+                alert("User not logged in.");
                 return;
             } else {
                 userId = user.uid;
@@ -203,7 +206,7 @@ document.getElementById('textAreaDiv').style.visibility="visible";
      
 <div id="demobox">
     <div style="padding-left:16px">
-  <h2>Home Page</h2>
+  <h2 id="title">Home</h2>
   <p>Press "Create Spark" to *spark*!</p>
     
 </div>
@@ -251,6 +254,7 @@ document.getElementById('textAreaDiv').style.visibility="visible";
     padding: 7px 20px;
 	border-radius: 25px;
     text-decoration: none;
+    font-family: 'Roboto';
     color: #FFF;
     background-image: -webkit-linear-gradient(45deg, #FFC107 0%, #ff8b5f 100%);
     background-image: linear-gradient(45deg, #FFC107 0%, #ff8b5f 100%);
@@ -272,6 +276,7 @@ document.getElementById('textAreaDiv').style.visibility="visible";
   color: black;
   padding: 9px 20px;
   text-align: center;
+font-family: 'Roboto';
   font-size: 16px;
   margin: 4px 2px;
   opacity: 0.6;
@@ -319,7 +324,8 @@ document.getElementById('textAreaDiv').style.visibility="visible";
             top: -18px;
             left:7px;
 }       
-            #logowords {
+                     
+ #logowords {
  
   color: black;
   padding: 9px 20px;
@@ -379,7 +385,8 @@ document.getElementById('textAreaDiv').style.visibility="visible";
   background-color: white;
   border: #F012BE; 
     border-color: #F012BE;
-  color: black;
+  color: white;
+font-family: 'Roboto';
   padding: 9px 50px;
   text-align: center;
   font-size: 16px;
@@ -395,9 +402,10 @@ document.getElementById('textAreaDiv').style.visibility="visible";
 }
             
         #signin {
-  background-color: #7FFF00;
+  background-color: #1E90FF;
   border: none;
   color: white;
+font-family: 'Roboto';
   padding: 9px 16px;
   text-align: center;
   font-size: 16px;
@@ -415,10 +423,11 @@ document.getElementById('textAreaDiv').style.visibility="visible";
 #signin:hover {opacity: 1}
             
              #signout {
-  background-color: #f4511e;
+  background-color: #1E90FF;
   border: none;
   color: white;
   padding: 9px 16px;
+  font-family: 'Roboto';
   text-align: center;
   font-size: 16px;
   margin: 4px 2px;
@@ -437,7 +446,7 @@ document.getElementById('textAreaDiv').style.visibility="visible";
         
        <style>
       #demobox {
-  background-color: #DCDCDC ;
+  background-color: #6495ED ;
           position: relative;
           width:2000px;
           top: -10px;
