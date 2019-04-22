@@ -2,10 +2,8 @@
 <html>
  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
 
-    <head>
-    
-    <link href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet'>
-    <script src="jquery-3.3.1.min.js"></script>
+    <head><script src="jquery-3.3.1.min.js"></script>
+         <link href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet'>
 
     </head>
     <script src="https://apis.google.com/js/platform.js" async defer></script>
@@ -14,12 +12,18 @@
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 
     <style>
-        tr:hover {background-color: #f5f5f5;}
+        tr:hover {background-color: #6495ED;}
         th, td {
             border-bottom: 1px solid #ddd;
+            border-left: solid 2px #92DFF3;
         }
+        body{
+            background-color: #c0deed;
+        }
+      
     
     </style>
+    <script src="moment.js"></script>
     <script>
         
         // Initialize Firebase
@@ -36,7 +40,7 @@
         // Check to see if you are logged in
         firebase.auth().onAuthStateChanged(function(user) {
             if (user == null) {
-                alert("User not logged in.");
+                alert("Not logged in.");
                 return;
             } else {
                 userId = user.uid;
@@ -51,8 +55,18 @@
                 // write data to document
                 mydiv = document.getElementById("mydata");
                 mydiv.innerHTML = name
+                 mydiv2 = document.getElementById("mydata2");
+                mydiv2.innerHTML = name
+                mydiv3 = document.getElementById("mydata3");
+                mydiv3.innerHTML = "@" + name
+                mydiv4 = document.getElementById("followers");
+                mydiv4.innerHTML = "Followers:" + "<br>" + "5"
+                mydiv5 = document.getElementById("following");
+                mydiv5.innerHTML = "Following:" + "<br>" + "8"
                 myphotodiv = document.getElementById("myphoto");
-                myphotodiv.innerHTML = "<img src='" + imageUrl + "'/>";
+                myphotodiv.innerHTML = "<img src='" + imageUrl + "'class='avatar'/>";
+                myphotodiv2 = document.getElementById("myphoto2");
+                myphotodiv2.innerHTML = "<img src='" + imageUrl + "'class='avatar2'/>";
 
                 firebase.database().ref('/tweets').once('value').then(function(snapshot) {
                     var data = (snapshot.val());
@@ -109,29 +123,31 @@
         
         function updatetweets(data) {
             //var mylist = "<ul>";
-            var mytab = "<table>";
+            var mytab = "<table bordercolor='#92DFF3' >";
             users = data[1]; // put on top, because changed data - not good coding change later
             data = data[0];
             
             for (var u in data) {
                 for (var t in data[u]) {
                     mytab = mytab + "<tr>";
-                    var date = new Date(data[u][t].time);
-                    var time = date.toString();
+                    var date = (data[u][t].time);
+                  //  var time = date.toString();
                     if (data[u][t].img != "") {
-                        mytab = mytab + "<td><img src='" + users[u].profile_picture + "' width='50px'></td>";
-                        mytab = mytab + "<td>" + users[u].email + "</td>";
-                        mytab = mytab + "<td>" + data[u][t].tweet + "</td>";
-                        mytab = mytab + "<td>" + time + "<br><img src='" + data[u][t].img + "' width='300px'></td>";
+                        mytab = mytab + "<td><img src='" + users[u].profile_picture + "' class='avatar' width='50px'></td>";
+                        mytab = mytab + "<td>"  + "<div style='font-family: Roboto; color: #cc7000; font-size: 18px;'> " +  users[u].email + "</div>" + "<br>" + "<br>" + data[u][t].tweet  + "<br>" + "<br>" + "</td>";
+                    //    font-family: 'Roboto';
+                      //  mytab = mytab + "<td>" + data[u][t].tweet + "</td>";
+                        mytab = mytab + "<td>" + "<div style='font-family: Roboto; color: #6495ED; font-size: 13px;'> " + date + "</div>" + "<br>" + "<img src='" + data[u][t].img + "' width='180px' height='150px'>" + "<br>" + "<br>"  + "</td>";
                     } else {
-                        mytab = mytab + "<td><img src='" + users[u].profile_picture + "' width='50px'></td>";
-                        mytab = mytab + "<td>" + users[u].email + "</td>";
-                        mytab = mytab + "<td>" + data[u][t].tweet + "</td>";
-                        mytab = mytab + "<td>" + time + "</td>";
+                        mytab = mytab + "<td><img src='" + users[u].profile_picture + "' ' class='avatar' width='50px'></td>";
+                        mytab = mytab + "<td>"  + "<div style='font-family: Roboto; color: #cc7000; font-size: 18px;'> " +  users[u].email + "</div>" + "<br>" + "<br>" + data[u][t].tweet  + "<br>" + "<br>" + "</td>";
+                     //  mytab = mytab + "<td>" + data[u][t].tweet + "</td>";
+                        mytab = mytab + "<td>" + "<div style='font-family: Roboto; color: #6495ED; font-size: 13px;'> " + date + "</div>" + "</td>";
                         
-                        
+                     // 
                     } 
                     mytab = mytab + "</tr>";
+                    
                 }   
             }
             //mylist = mylist + "</ul>";
@@ -139,16 +155,19 @@
             var mytdiv = document.getElementById("mytweets");
             //mytdiv.innerHTML = mylist;
             mytdiv.innerHTML = mytab;
+            
         }
         
-        // write tweets to firebase
+        // push data to firebase
         function tweet() {
             
+
             var twitdoc = document.getElementById("twit");
             var twitimg = document.getElementById("imgTest");
             var nameValue = twitdoc.value;
             var imgValue = twitimg.innerHTML;
-            var js_time = Date.now();
+
+            var js_time = moment().format('LLL');
             var tweetid = firebase.database().ref('tweets/' + userId + "/").push({tweet: nameValue, time: js_time, img: imgValue});
             twitdoc.value = "";
             writeUserData(userId, name, email, imageUrl);
@@ -180,7 +199,7 @@
             console.log("Signing in");
             var provider = new firebase.auth.GoogleAuthProvider();
             firebase.auth().signInWithRedirect(provider).then(function(result) { 
-                window.location.replace("fbtest.html");
+                window.location.replace("home.html");
             });
         }
         
@@ -196,6 +215,7 @@
       function showTextArea() {
 document.getElementById('textAreaDiv').style.visibility="visible";
           document.getElementById('inputFileToLoad').style.visibility="visible";
+          document.getElementById('duck').style.visibility="visible";
 }
         
     </script>
@@ -206,9 +226,10 @@ document.getElementById('textAreaDiv').style.visibility="visible";
      
 <div id="demobox">
     <div style="padding-left:16px">
-  <h2 id="title">Home</h2>
+  <h2>Home Page</h2>
   <p>Press "Create Spark" to *spark*!</p>
-    
+    <img id="lbsquare" src="lbsquare.jpg">
+         <img id="lbsquare2" src="lbsquare2.jpg">
 </div>
   
  
@@ -225,7 +246,7 @@ document.getElementById('textAreaDiv').style.visibility="visible";
         
         <button id="spark" onclick="showTextArea()"> Create Spark</button><br>
         
-        <button class="btn" id="dark" onclick="chBackcolor('white')"><i class="far fa-moon"></i></button>
+        <button class="btn" id="dark" onclick="chBackcolor('#c0deed')"><i class="far fa-moon"></i></button>
          <button class="btn" id="light" onclick="chBackcolor('rgb(30,34,39)')"><i class="fas fa-moon"></i></button>
         <button class="btn" id="profile" onclick="location.href='profile.html';"><i class="fas fa-user"></i> </button>
          <button class="btn" id="home" onclick="location.href='home.html';"><i class="fas fa-home"></i> </button>
@@ -238,30 +259,100 @@ document.getElementById('textAreaDiv').style.visibility="visible";
         <style> 
              #inputFileToLoad{
                 position: absolute;
-                top: 230px;
-                left: 960px;
+                top: 260px;
+                right: 215px;
+                 color: #494949 !important;
+text-transform: uppercase;
+background: #ffffff;
+padding: 10px;
+border: 4px solid #0074D9 !important;
+border-radius: 50px;
+display: inline-block;
+cursor:pointer; 
+            
                 
             }
+             #lbsquare {
+position: absolute;
+    top: 163px;
+    left: 50px;
+  width: 420px;
+  height: 110px;
+}
+            #lbsquare2 {
+position: absolute;
+    top: 263px;
+    left: 50px;
+  width: 420px;
+  height: 110px;
+}
+             .avatar {
+  vertical-align: middle;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+}
+            .avatar2 {
+  position: absolute;
+                top: 155px;
+                left: 20px;
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+}
+            #mydata2{
+            position: absolute;
+            top: 223px;
+            left: 180px;
+                font-size: 26px;
+                font-family: 'Roboto';
+        }
+            #mydata3{
+            position: absolute;
+            top: 263px;
+            left: 180px;
+                font-size: 16px;
+                font-family: 'Roboto';
+                color: 	#EE7600;
+        }
+            #followers{
+            position: absolute;
+            top: 313px;
+            left: 280px;
+                font-size: 22px;
+                font-family: 'Roboto';
+                color: #6495ED;      
+            }
+          
+            #following{
+            position: absolute;
+            top: 313px;
+            left: 120px;
+                font-size: 22px;
+                font-family: 'Roboto';
+                color: #6495ED;     
+            }
+            
             #textAreaDiv{
                 position: absolute;
-                top: 150px;
-                left: 500px;
+                top: 138px;
+                right: 430px;
                 
             }
             
+            
             #spark{
     display: inline-block;
-    padding: 7px 20px;
+    padding: 13px 30px;
 	border-radius: 25px;
     text-decoration: none;
-    font-family: 'Roboto';
     color: #FFF;
     background-image: -webkit-linear-gradient(45deg, #FFC107 0%, #ff8b5f 100%);
     background-image: linear-gradient(45deg, #FFC107 0%, #ff8b5f 100%);
     transition: .4s;
                 position: absolute;
                 top: 50px;
-                right:10px;
+                right:680px;
 }
 
 #spark:hover {
@@ -276,7 +367,6 @@ document.getElementById('textAreaDiv').style.visibility="visible";
   color: black;
   padding: 9px 20px;
   text-align: center;
-font-family: 'Roboto';
   font-size: 16px;
   margin: 4px 2px;
   opacity: 0.6;
@@ -324,8 +414,7 @@ font-family: 'Roboto';
             top: -18px;
             left:7px;
 }       
-                     
- #logowords {
+            #logowords {
  
   color: black;
   padding: 9px 20px;
@@ -385,8 +474,7 @@ font-family: 'Roboto';
   background-color: white;
   border: #F012BE; 
     border-color: #F012BE;
-  color: white;
-font-family: 'Roboto';
+  color: black;
   padding: 9px 50px;
   text-align: center;
   font-size: 16px;
@@ -419,7 +507,6 @@ font-family: 'Roboto';
             top: -4px;
             right:115px;
 }
-
 #signin:hover {opacity: 1}
             
              #signout {
@@ -440,7 +527,6 @@ font-family: 'Roboto';
             top: -4px;
             right:10px;
 }
-
 #signout:hover {opacity: 1}
         </style>
         
@@ -455,18 +541,26 @@ font-family: 'Roboto';
  
 }</style>
     
-        <form>
-            <p id="demo"></p>
-            Tweet:<br>
+       
+            <p id="demod">  </p>
+           
          <!--   <textarea id="twit" type="text" name="thetweet" cols="100" rows="4" hidden></textarea> -->
-        </form> 
+     
         <div id="textAreaDiv" style="visibility:hidden;" class="divOutside"><textarea id="twit" type="text" name="thetweet" cols="70" rows="8" style="border:outset 4px orange;"></textarea></div>
-        <button type="button" onclick="tweet()">Submit</button>
+        <button id="duck" type="button" onclick="tweet()" style="visibility:hidden;" class="example_c">Submit</button>    
+   <!--   <button id="duck" style="visibility:hidden;"  type="button" onlick="tweet()" >Spark</button><br><br> -->
+    
         
     
     <div id="mytweets"></div>
     <div id="mydata"></div>
+        <div id="mydata2"></div>
+        <div id="mydata3"></div>
+          <div id="followers"></div>
+          <div id="following"></div>
     <div id="myphoto"></div>
+        <div id="myphoto2"></div>
+        <h1 id="signedinas">Signed in as:</h1>
     </body>
 
     <script>
@@ -494,6 +588,64 @@ font-family: 'Roboto';
     </script>
     
     <style>
+        
+        #mytweets{
+           position: absolute;
+            top: 160px;
+            left: 500px; 
+            width:50px;
+            background: #92DFF3;
+        }
+        #demod{
+           position: absolute;
+            top: 130px;
+            left: 40px; 
+            font-size:  40px;
+        }
+        #myphoto{
+            position: absolute;
+            top: 50px;
+            right: 50px;
+        }
+        #myphoto2{
+            position: absolute;
+            top: 50px;
+            left: 50px;
+        }
+        #mydata{
+            position: absolute;
+            top: 109px;
+            right: 35px;
+        }
+        
+        
+        #signedinas{
+             position: absolute;
+            top: 39px;
+            right: 105px;
+        }
+        
+        .example_c {
+color: #494949 !important;
+text-transform: uppercase;
+background: #ffffff;
+padding: 20px;
+border: 4px solid #01FF70 !important;
+border-radius: 50px;
+display: inline-block;
+cursor:pointer; 
+            position: absolute;
+            top: 250px;
+            right: 10px;
+}
+        
+        .example_c:hover {
+color: #ffffff !important;
+background: #f6b93b;
+border-color: #f6b93b !important;
+transition: all 0.4s ease 0s;
+            border-radius: 50px;
+}
     
     * {
   font-family: Arial, Helvetica, san-serif;
@@ -525,13 +677,50 @@ font-family: 'Roboto';
             opacity:0 !important;
         }
         
+        
     </style>
     
+   
         
-        
-        
-    
 
+
+    <style>
+    cart {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 270px;
+  height: 100%;
+  transform: translateX(100%);
+  background: silver;
+  transition: transform .4s ease;
+}
+
+.cart-open .cart {
+  transform: translateX(0);
+}
+
+.cart-open:before {
+  content: "";
+  position: fixed;
+  background: rgba(0, 0, 0, .85);
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+}
+
+.cart-toggle {
+  position: absolute;
+    top: 10px;
+}
+
+    </style>
+    <script>
+    $('.cart-toggle').click(function() {
+  $('.cart-container').toggleClass('cart-open');
+});
+</script>
     
 
     
