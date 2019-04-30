@@ -3,27 +3,28 @@
  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
 
     <head><script src="jquery-3.3.1.min.js"></script>
-         <link href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet'>
+ <link rel="stylesheet" href="css/style.css">
+         <meta charset="UTF-8">
+        <link rel='stylesheet' href='http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css'>
+<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/mediaelement/4.2.7/mediaelementplayer.min.css'>
+        <script src="https://www.gstatic.com/firebasejs/5.8.5/firebase.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 
     </head>
     <script src="https://apis.google.com/js/platform.js" async defer></script>
     
-    <script src="https://www.gstatic.com/firebasejs/5.8.5/firebase.js"></script>
-    <script src="http://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-
+     
+    
     <style>
-        tr:hover {background-color: #6495ED;}
+        tr:hover {background-color: #f5f5f5;}
         th, td {
             border-bottom: 1px solid #ddd;
-            border-left: solid 2px #92DFF3;
         }
         body{
             background-color: #c0deed;
         }
-      
     
     </style>
-    <script src="moment.js"></script>
     <script>
         
         // Initialize Firebase
@@ -54,19 +55,9 @@
                 
                 // write data to document
                 mydiv = document.getElementById("mydata");
-                mydiv.innerHTML = name
-                 mydiv2 = document.getElementById("mydata2");
-                mydiv2.innerHTML = name
-                mydiv3 = document.getElementById("mydata3");
-                mydiv3.innerHTML = "@" + name
-                mydiv4 = document.getElementById("followers");
-                mydiv4.innerHTML = "Followers:" + "<br>" + "5"
-                mydiv5 = document.getElementById("following");
-                mydiv5.innerHTML = "Following:" + "<br>" + "8"
+             //   mydiv.innerHTML = name
                 myphotodiv = document.getElementById("myphoto");
                 myphotodiv.innerHTML = "<img src='" + imageUrl + "'class='avatar'/>";
-                myphotodiv2 = document.getElementById("myphoto2");
-                myphotodiv2.innerHTML = "<img src='" + imageUrl + "'class='avatar2'/>";
 
                 firebase.database().ref('/tweets').once('value').then(function(snapshot) {
                     var data = (snapshot.val());
@@ -80,6 +71,7 @@
                            dataarray = [data,userdata]
                            console.log(dataarray)
                            updatetweets(dataarray); 
+                             mydiv.innerHTML = name + " " + "<br>" + "<br>" + "Bio:" + " " + userdata[userId].bio;
                         }
                       });
                       //console.log(data)
@@ -123,31 +115,30 @@
         
         function updatetweets(data) {
             //var mylist = "<ul>";
-            var mytab = "<table bordercolor='#92DFF3' >";
+            var mytab = "<table>";
             users = data[1]; // put on top, because changed data - not good coding change later
             data = data[0];
             
             for (var u in data) {
                 for (var t in data[u]) {
                     mytab = mytab + "<tr>";
-                    var date = (data[u][t].time);
-                  //  var time = date.toString();
-                    if (data[u][t].img != "") {
-                        mytab = mytab + "<td><img src='" + users[u].profile_picture + "' class='avatar' width='50px'></td>";
-                        mytab = mytab + "<td>"  + "<div style='font-family: Roboto; color: #cc7000; font-size: 18px;'> " +  users[u].email + "</div>" + "<br>" + "<br>" + data[u][t].tweet  + "<br>" + "<br>" + "</td>";
-                    //    font-family: 'Roboto';
-                      //  mytab = mytab + "<td>" + data[u][t].tweet + "</td>";
-                        mytab = mytab + "<td>" + "<div style='font-family: Roboto; color: #6495ED; font-size: 13px;'> " + date + "</div>" + "<br>" + "<img src='" + data[u][t].img + "' width='180px' height='150px'>" + "<br>" + "<br>"  + "</td>";
-                    } else {
-                        mytab = mytab + "<td><img src='" + users[u].profile_picture + "' ' class='avatar' width='50px'></td>";
-                        mytab = mytab + "<td>"  + "<div style='font-family: Roboto; color: #cc7000; font-size: 18px;'> " +  users[u].email + "</div>" + "<br>" + "<br>" + data[u][t].tweet  + "<br>" + "<br>" + "</td>";
-                     //  mytab = mytab + "<td>" + data[u][t].tweet + "</td>";
-                        mytab = mytab + "<td>" + "<div style='font-family: Roboto; color: #6495ED; font-size: 13px;'> " + date + "</div>" + "</td>";
+                    var date = new Date(data[u][t].time);
+                    var time = date.toString();
+                  /*  if (data[u][t].img != "") {
+                        mytab = mytab + "<td><img src='" + users[u].profile_picture + "' class='avatar'></td>";
                         
-                     // 
-                    } 
+                        mytab = mytab + "<td>" + users[u].email + "</td>";
+                        mytab = mytab + "<td>" + data[u][t].tweet + "</td>";
+                        mytab = mytab + "<td>" + time + "<br><img src='" + data[u][t].img + "' width='300px'></td>";
+                    } else {
+                        mytab = mytab + "<td><img src='" + users[u].profile_picture + "' class='avatar'></td>";
+                        mytab = mytab + "<td>" + users[u].email + "</td>";
+                        mytab = mytab + "<td>" + data[u][t].tweet + "</td>";
+                        mytab = mytab + "<td>" + time + "</td>";
+                        
+                        
+                    }  */
                     mytab = mytab + "</tr>";
-                    
                 }   
             }
             //mylist = mylist + "</ul>";
@@ -155,19 +146,16 @@
             var mytdiv = document.getElementById("mytweets");
             //mytdiv.innerHTML = mylist;
             mytdiv.innerHTML = mytab;
-            
         }
-        
-        // push data to firebase
-        function tweet() {
+         
+        // write tweets to firebase
+       function tweet() {
             
-
             var twitdoc = document.getElementById("twit");
             var twitimg = document.getElementById("imgTest");
             var nameValue = twitdoc.value;
             var imgValue = twitimg.innerHTML;
-
-            var js_time = moment().format('LLL');
+            var js_time = Date.now();
             var tweetid = firebase.database().ref('tweets/' + userId + "/").push({tweet: nameValue, time: js_time, img: imgValue});
             twitdoc.value = "";
             writeUserData(userId, name, email, imageUrl);
@@ -184,10 +172,11 @@
                            dataarray = [data,userdata]
                            console.log(dataarray)
                            updatetweets(dataarray); 
+                           
                         }
                       });
                     }
-                });
+                });   
             
             
             
@@ -196,10 +185,11 @@
         }
         
         function signin() {
+            
             console.log("Signing in");
             var provider = new firebase.auth.GoogleAuthProvider();
             firebase.auth().signInWithRedirect(provider).then(function(result) { 
-                window.location.replace("home.html");
+                window.location.replace("index.html");
             });
         }
         
@@ -214,10 +204,27 @@
 
       function showTextArea() {
 document.getElementById('textAreaDiv').style.visibility="visible";
-          document.getElementById('inputFileToLoad').style.visibility="visible";
-          document.getElementById('duck').style.visibility="visible";
 }
         
+        function updatebio() {
+            var bio = document.getElementById("bioinput").value;
+             firebase.database().ref('users/' + userId).set({
+                        username: name,
+                        email: email,
+                        profile_picture : imageUrl,
+                        bio: bio
+                    });
+            
+               mybiodiv = document.getElementById("mydata");
+                mybiodiv.innerHTML = name + " " + "<br>" + "<br>" + bio;
+         
+        }
+        
+        function bioArea() {
+document.getElementById('biochange').style.visibility="visible";
+            document.getElementById('bioinput').style.visibility="visible";
+         
+}
     </script>
 
     <body>
@@ -226,10 +233,9 @@ document.getElementById('textAreaDiv').style.visibility="visible";
      
 <div id="demobox">
     <div style="padding-left:16px">
-  <h2>Home Page</h2>
-  <p>Press "Create Spark" to *spark*!</p>
-    <img id="lbsquare" src="lbsquare.jpg">
-         <img id="lbsquare2" src="lbsquare2.jpg">
+ 
+  <p style="visibility: hidden">This is your profile</p>
+    
 </div>
   
  
@@ -237,113 +243,82 @@ document.getElementById('textAreaDiv').style.visibility="visible";
 </div>
        
         
-        <br><input id="inputFileToLoad" style="visibility:hidden;"type="file" onclick="showTextArea()" onchange="encodeImageFileAsURL();" />
-        <div id="imgTest" style="display:none;"></div>
+   
         <!--  <button id="signin" onclick="signin()">Sign in</button> -->
         <a href="index.html" class="button" id="signin">Sign in</a>
         <button id="signout" onclick="signout()">Sign out</button>
          <input type="text" placeholder="Search.."  id="searchbar">
         
-        <button id="spark" onclick="showTextArea()"> Create Spark</button><br>
+     
         
-        <button class="btn" id="dark" onclick="chBackcolor('#c0deed')"><i class="far fa-moon"></i></button>
+        <button class="btn" id="dark" onclick="chBackcolor('white')"><i class="far fa-moon"></i></button>
          <button class="btn" id="light" onclick="chBackcolor('rgb(30,34,39)')"><i class="fas fa-moon"></i></button>
         <button class="btn" id="profile" onclick="location.href='profile.html';"><i class="fas fa-user"></i> </button>
          <button class="btn" id="home" onclick="location.href='home.html';"><i class="fas fa-home"></i> </button>
         
         <img src=" https://images.vexels.com/media/users/3/143495/isolated/preview/6b80b9965b1ec4d47c31d7eccf8ce4b0-yellow-lightning-bolt-icon-by-vexels.png" id="logo">
         <img src="images/logotext.png" id="logowords">
+    
+        
+        
+        <body>
+        
+    <div class="contain">
+        <div class="container">
+            <div class="music-player">
+                <div class="cover">
+                    <img src="otrpic.jpeg" alt="">   
+                </div>
+                <div class="titre">
+                    <h3>Lil Nas X</h3>
+                    <h1>Old Town Road</h1>
+                </div>
+                <div class="lecteur">
+                    <audio style="width: 100%;" class="fc-media">
+                        <source src="oldtownroad.mp3" type="audio/mp3"/>
+                    </audio>
+                </div>
+            </div>
+        </div>
+    </div>
+
+   
+<script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js'></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/mediaelement/4.2.7/mediaelement-and-player.min.js'></script>
+
+  
+
+    <script  src="js/index.js"></script>
+            
+            <img src="pictureholder.png" id="picholder">
+</body>
        
-     
         
         <style> 
-             #inputFileToLoad{
+            #picholder{
                 position: absolute;
-                top: 260px;
-                right: 215px;
-                 color: #494949 !important;
-text-transform: uppercase;
-background: #ffffff;
-padding: 10px;
-border: 4px solid #0074D9 !important;
-border-radius: 50px;
-display: inline-block;
-cursor:pointer; 
-            
-                
-            }
-             #lbsquare {
-position: absolute;
-    top: 163px;
-    left: 50px;
-  width: 420px;
-  height: 110px;
-}
-            #lbsquare2 {
-position: absolute;
-    top: 263px;
-    left: 50px;
-  width: 420px;
-  height: 110px;
-}
-             .avatar {
-  vertical-align: middle;
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-}
-            .avatar2 {
-  position: absolute;
-                top: 155px;
-                left: 20px;
-  width: 90px;
-  height: 90px;
-  border-radius: 50%;
-}
-            #mydata2{
-            position: absolute;
-            top: 223px;
-            left: 180px;
-                font-size: 26px;
-                font-family: 'Roboto';
-        }
-            #mydata3{
-            position: absolute;
-            top: 263px;
-            left: 180px;
-                font-size: 16px;
-                font-family: 'Roboto';
-                color: 	#EE7600;
-        }
-            #followers{
-            position: absolute;
-            top: 313px;
-            left: 280px;
-                font-size: 22px;
-                font-family: 'Roboto';
-                color: #6495ED;      
-            }
-          
-            #following{
-            position: absolute;
-            top: 313px;
-            left: 120px;
-                font-size: 22px;
-                font-family: 'Roboto';
-                color: #6495ED;     
+                top: 300px;
+                left: 550px;
+                height: 400px;
+                width: 400px;
             }
             
             #textAreaDiv{
                 position: absolute;
-                top: 138px;
-                right: 430px;
+                top: 100px;
+                left: 500px;
                 
             }
-            
+            .avatar {
+  vertical-align: middle;
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+}
             
             #spark{
     display: inline-block;
-    padding: 13px 30px;
+    padding: 7px 20px;
 	border-radius: 25px;
     text-decoration: none;
     color: #FFF;
@@ -352,7 +327,7 @@ position: absolute;
     transition: .4s;
                 position: absolute;
                 top: 50px;
-                right:680px;
+                right:10px;
 }
 
 #spark:hover {
@@ -489,7 +464,7 @@ position: absolute;
             right:355px;
 }
             
-        #signin {
+         #signin {
   background-color: #1E90FF;
   border: none;
   color: white;
@@ -531,36 +506,31 @@ font-family: 'Roboto';
         </style>
         
        <style>
-      #demobox {
+     
+   #demobox {
   background-color: #6495ED ;
           position: relative;
           width:2000px;
           top: -10px;
           left:-10px;
   padding: 19px ;
- 
 }</style>
     
-       
-            <p id="demod">  </p>
-           
+        <form>
+          
          <!--   <textarea id="twit" type="text" name="thetweet" cols="100" rows="4" hidden></textarea> -->
-     
+        </form> 
         <div id="textAreaDiv" style="visibility:hidden;" class="divOutside"><textarea id="twit" type="text" name="thetweet" cols="70" rows="8" style="border:outset 4px orange;"></textarea></div>
-        <button id="duck" type="button" onclick="tweet()" style="visibility:hidden;" class="example_c">Submit</button>    
-   <!--   <button id="duck" style="visibility:hidden;"  type="button" onlick="tweet()" >Spark</button><br><br> -->
-    
+       
+        
+        <textarea id="bioinput" type="text"  cols="70"  rows="1" style="border:outset 4px orange; visibility: hidden;"></textarea>
+        <button style="visibility: hidden;" id="biochange" type="button" onclick="updatebio()">Confirm Change</button>
+        <button id="editbio" onclick="bioArea()">Edit Bio</button>
         
     
     <div id="mytweets"></div>
     <div id="mydata"></div>
-        <div id="mydata2"></div>
-        <div id="mydata3"></div>
-          <div id="followers"></div>
-          <div id="following"></div>
     <div id="myphoto"></div>
-        <div id="myphoto2"></div>
-        <h1 id="signedinas">Signed in as:</h1>
     </body>
 
     <script>
@@ -588,64 +558,35 @@ font-family: 'Roboto';
     </script>
     
     <style>
-        
-        #mytweets{
-           position: absolute;
-            top: 160px;
-            left: 500px; 
-            width:50px;
-            background: #92DFF3;
-        }
-        #demod{
-           position: absolute;
+        #bioinput{
+            position: absolute;
             top: 130px;
-            left: 40px; 
-            font-size:  40px;
+            left: 930px;
+            
         }
-        #myphoto{
+        #biochange{
             position: absolute;
-            top: 50px;
-            right: 50px;
+            top: 160px;
+            left: 930px;
+            
         }
-        #myphoto2{
+        #editbio{
             position: absolute;
-            top: 50px;
-            left: 50px;
+            top: 220px;
+            left: 870px;
+             
         }
         #mydata{
             position: absolute;
-            top: 109px;
-            right: 35px;
+            top: 90px;
+            left: 680px;
+            font-size: 40px;
         }
-        
-        
-        #signedinas{
-             position: absolute;
-            top: 39px;
-            right: 105px;
-        }
-        
-        .example_c {
-color: #494949 !important;
-text-transform: uppercase;
-background: #ffffff;
-padding: 20px;
-border: 4px solid #01FF70 !important;
-border-radius: 50px;
-display: inline-block;
-cursor:pointer; 
+        #myphoto{
             position: absolute;
-            top: 250px;
-            right: 10px;
-}
-        
-        .example_c:hover {
-color: #ffffff !important;
-background: #f6b93b;
-border-color: #f6b93b !important;
-transition: all 0.4s ease 0s;
-            border-radius: 50px;
-}
+            top: 80px;
+            left: 500px;
+        }
     
     * {
   font-family: Arial, Helvetica, san-serif;
@@ -677,50 +618,13 @@ transition: all 0.4s ease 0s;
             opacity:0 !important;
         }
         
-        
     </style>
     
-   
         
+        
+        
+    
 
-
-    <style>
-    cart {
-  position: fixed;
-  top: 0;
-  right: 0;
-  width: 270px;
-  height: 100%;
-  transform: translateX(100%);
-  background: silver;
-  transition: transform .4s ease;
-}
-
-.cart-open .cart {
-  transform: translateX(0);
-}
-
-.cart-open:before {
-  content: "";
-  position: fixed;
-  background: rgba(0, 0, 0, .85);
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 0;
-}
-
-.cart-toggle {
-  position: absolute;
-    top: 10px;
-}
-
-    </style>
-    <script>
-    $('.cart-toggle').click(function() {
-  $('.cart-container').toggleClass('cart-open');
-});
-</script>
     
 
     

@@ -1,38 +1,47 @@
+
 <html>
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+ <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+    
 
     <head><script src="jquery-3.3.1.min.js"></script>
+        <link rel="stylesheet" href="css/style.css">
+          <meta charset="UTF-8">
+         <link href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet'>
+<link rel='stylesheet' href='http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css'>
+<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/mediaelement/4.2.7/mediaelementplayer.min.css'>
+
+      
 
     </head>
-
-<body>
-
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    
-     
-<div id="demobox">
-  
- 
-
-</div>
-    
-   
-
-<div style="padding-left:16px">
-  <h2>Top Navigation Example</h2>
-  <p>Some content..</p>
-    
-</div>
-
-</body>
-   
     <script src="https://apis.google.com/js/platform.js" async defer></script>
-    
+
     <script src="https://www.gstatic.com/firebasejs/5.8.5/firebase.js"></script>
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-<script>
-  // Initialize Firebase
-  var config = {
+    
+<audio id="audio" src="noise.mp3" autoplay="false" ></audio>
+    <style>
+        tr:hover {background-color: #6495ED;}
+        th, td {
+            border-bottom: 0px solid #ddd;
+            border-left: solid 0px #92DFF3;
+            border-radius: 25px;
+            
+        }
+        table{
+            border-radius: 25px;
+            border: solid 1px #1E90FF;
+        }
+        body{
+            background-color: #c0deed;
+        }
+      
+    
+    </style>
+    <script src="moment.js"></script>
+    <script>
+        
+        // Initialize Firebase
+       var config = {
     apiKey: "AIzaSyBB96FhW5NPDb2Tfq27FjRAAbLRK1M-APA",
     authDomain: "test-7881c.firebaseapp.com",
     databaseURL: "https://test-7881c.firebaseio.com",
@@ -41,7 +50,6 @@
     messagingSenderId: "508423391002"
   };
   firebase.initializeApp(config);
-
                 
         // Check to see if you are logged in
         firebase.auth().onAuthStateChanged(function(user) {
@@ -55,95 +63,162 @@
                 email = user.email;
                     
                 // write user data to users
-                writeUserData(userId, name, email, imageUrl);
-                
+                //writeUserData(userId, name, email, imageUrl);
+                // moved to tweet function
+               
                 // write data to document
                 mydiv = document.getElementById("mydata");
                 mydiv.innerHTML = name
+                 mydiv2 = document.getElementById("mydata2");
+                mydiv2.innerHTML = "<b>" + name
+                mydiv3 = document.getElementById("mydata3");
+                mydiv3.innerHTML = "@" + name
+                mydiv4 = document.getElementById("followers");
+               
+                mydiv4.innerHTML = "Followers:" + "<br>" + "8" 
+                mydiv5 = document.getElementById("following");
+                mydiv5.innerHTML = "Following:" + "<br>" + "4"
                 myphotodiv = document.getElementById("myphoto");
-                myphotodiv.innerHTML = "<img src='" + imageUrl + "'/>";
-
-                firebase.database().ref('/tweets/' + userId).once('value').then(function(snapshot) {
+                myphotodiv.innerHTML = "<img src='" + imageUrl + "'class='avatar'/>";
+                myphotodiv2 = document.getElementById("myphoto2");
+                myphotodiv2.innerHTML = "<img src='" + imageUrl + "'class='avatar2'/>";
+                followdiv2 = document.getElementById("followdiv");
+                
+                firebase.database().ref('/tweets').once('value').then(function(snapshot) {
                     var data = (snapshot.val());
                     if (data == null) {
                       console.log("No data found at /tweets/" + userId);  
                     } else {
-                      /*
-                      console.log(data); 
-                      var mylist = "<ul>";
-                      for (var u in data) {
-                         console.log(data[u]);
-                         for (var t in data[u]) {
-                            console.log(data[u][t].tweet);
-                            mylist = mylist + "<li>" + data[u][t].tweet + "</li>";
-                         } 
-                      }
-                      mylist = mylist + "</ul>";
-                        console.log(mylist);
-                      var mytdiv = document.getElementById("mytweets");
-                      mytdiv.innerHTML = mylist;
-                      */
-                      updatetweets(data);
+                        
+                      firebase.database().ref('/users').once('value').then(function(snapshot) { 
+                        var userdata = (snapshot.val());
+                        if (userdata != null) {
+                           dataarray = [data,userdata]
+                           console.log(dataarray)
+                           updatetweets(dataarray); 
+                              
+                           
+                        }
+                      });
+                      //console.log(data)
+                      //updatetweets(data);
                     }
                 });
             } // end user null check
         }); // end check auth state
         
+        function encodeImageFileAsURL() {
+
+            var filesSelected = document.getElementById("inputFileToLoad").files;
+            if (filesSelected.length > 0) {
+                var fileToLoad = filesSelected[0];
+                var fileReader = new FileReader();
+                fileReader.onload = function(fileLoadedEvent) {
+                    var srcData = fileLoadedEvent.target.result; // <--- data: base64
+                    //var newImage = document.createElement('img');
+                    //newImage.src = srcData;
+                    //document.getElementById("imgTest").innerHTML = newImage.outerHTML;
+                    document.getElementById("imgTest").innerHTML = srcData;
+                    //console.log("Converted Base64 version is: " + document.getElementById("imgTest").innerHTML);
+                    console.log(srcData);
+                }
+                fileReader.readAsDataURL(fileToLoad);
+            }
+        } // end function
+        
         // write user data
         function writeUserData(userId, name, email, imageUrl) {
-            firebase.database().ref('users/' + userId).set({
-                username: name,
-                email: email,
-                profile_picture : imageUrl
+            firebase.database().ref('users/' + userId).once('value',    function(snapshot) {
+                 if (!snapshot.exists()) {
+                    firebase.database().ref('users/' + userId).set({
+                        username: name,
+                        email: email,
+                        profile_picture : imageUrl
+                    }); 
+                 }                                      
             });
         }
         
         function updatetweets(data) {
-            console.log(data); 
-            var mylist = "<ul>";
-            for (var u in data) {
-             //   console.log(data[u]);
-                var d = new Date(data[u].time);
-                var t = d.toString();
-             //   for (var t in data.tweets[u]) {
-              //      console.log(data.tweets[u][t].tweet);
-                    mylist = mylist + "<li>" + data[u].tweet + " (" + t + ")</li>";
-                } 
+            //var mylist = "<ul>";
+            var mytab = "<table border-radius='25'";
+            users = data[1]; // put on top, because changed data - not good coding change later
+            data = data[0];
             
-            mylist = mylist + "</ul>";
-            console.log(mylist);
+            for (var u in data) {
+                for (var t in data[u]) {
+                    mytab = mytab + "<tr>";
+                    var date = (data[u][t].time);
+                  //  var time = date.toString();
+                    if (data[u][t].img != "") {
+                        mytab = mytab + "<td><img src='" + users[u].profile_picture + "' class='avatar' width='50px'></td>";
+                        mytab = mytab + "<td>"  + "<div style='font-family: Roboto; color: #cc7000; font-size: 18px;'> " +  users[u].email + "</div>" + "<br>" + "<br>" + "<div style='font-family: Roboto; color: #0074D9;'> " + data[u][t].tweet  + "</div>" + "<br>" + "<br>" + "</td>";
+                    //    font-family: 'Roboto';
+                      //  mytab = mytab + "<td>" + data[u][t].tweet + "</td>";
+                        mytab = mytab + "<td>" + "<div style='font-family: Roboto; color: #6495ED; font-size: 13px;'> " + date + "</div>" + "<br>" + "<img src='" + data[u][t].img + "' width='180px' height='150px'>" + "<br>" + "<br>" + "</td>";
+                    } else {
+                        mytab = mytab + "<td><img src='" + users[u].profile_picture + "' ' class='avatar' width='50px'></td>";
+                        mytab = mytab + "<td>"  + "<div style='font-family: Roboto; color: #cc7000; font-size: 18px;'> " +  users[u].email + "</div>" + "<br>" + "<br>" + "<div style='font-family: Roboto; color: #0074D9;'> " + data[u][t].tweet  + "</div>" + "<br>" + "<br>" + "<br>"  + "<br>" + "</td>";
+                     //  mytab = mytab + "<td>" + data[u][t].tweet + "</td>";
+                        mytab = mytab + "<td>" + "<div style='font-family: Roboto; color: #6495ED; font-size: 13px;'> " + date + "</div>" + "</td>";
+                        
+                     // 
+                    } 
+                    mytab = mytab + "</tr>";
+                    
+                    
+                }   
+            }
+            //mylist = mylist + "</ul>";
+            mytab = mytab + "</table>"
             var mytdiv = document.getElementById("mytweets");
-            mytdiv.innerHTML = mylist;
+            //mytdiv.innerHTML = mylist;
+            mytdiv.innerHTML = mytab;
+            
         }
         
-        // write tweets to firebase
+        // push data to firebase
         function tweet() {
             
-            twitdoc = document.getElementById("twit");
+
+            var twitdoc = document.getElementById("twit");
+            var twitimg = document.getElementById("imgTest");
             var nameValue = twitdoc.value;
-            var js_time = Date.now();
-            var tweetid = firebase.database().ref('tweets/' + userId + "/").push({tweet: nameValue, time:js_time});
+            var imgValue = twitimg.innerHTML;
+
+            var js_time = moment().format('LLL');
+            var tweetid = firebase.database().ref('tweets/' + userId + "/").push({tweet: nameValue, time: js_time, img: imgValue});
             twitdoc.value = "";
+            writeUserData(userId, name, email, imageUrl);
             console.log("tweet written")
             
-            firebase.database().ref('/tweets/' + userId).once('value').then(function(snapshot) {
+            firebase.database().ref('/tweets').once('value').then(function(snapshot) {
                     var data = (snapshot.val());
                     if (data == null) {
                       console.log("No data found at /tweets/" + userId);  
-                    } else {
-                      updatetweets(data);
+                    } else { 
+                        firebase.database().ref('/users').once('value').then(function(snapshot) { 
+                        var userdata = (snapshot.val());
+                        if (userdata != null) {
+                           dataarray = [data,userdata]
+                           console.log(dataarray)
+                           updatetweets(dataarray); 
+                        }
+                      });
                     }
                 });
+            
+            
             
             // The unique key stored in tweetid is based on a timestamp, so list items will automatically be ordered chronologically. Because Firebase generates a unique key for each tweet, no write conflicts will occur if multiple users add a post at the same time. https://firebase.google.com/docs/database/admin/save-data
             
         }
         
-        
         function signin() {
             console.log("Signing in");
             var provider = new firebase.auth.GoogleAuthProvider();
-            firebase.auth().signInWithRedirect(provider).then(function(result) {  
+            firebase.auth().signInWithRedirect(provider).then(function(result) { 
+                window.location.replace("home.html");
             });
         }
         
@@ -152,52 +227,236 @@
             firebase.auth().signOut().then(function() {
             });
         }
-    
-    function chBackcolor(color) {
+        
+          
+        
+             function load_home() {
+     document.getElementById("musicdiv").innerHTML='<object type="text/html" data="mp/index.html" ></object>';
+}
+            
+            
+        
+        
+        
+        
+         function chBackcolor(color) {
    document.body.style.background = color;
 }
-     
-    
-  // function myFunction() {
-//    document.getElementById("demo").innerHTML = "<textarea cols='100' id="twit" rows='4' ></textarea>";
-//}
 
-    function showTextArea() {
+      function showTextArea() {
 document.getElementById('textAreaDiv').style.visibility="visible";
+          document.getElementById('inputFileToLoad').style.visibility="visible";
+          document.getElementById('duck').style.visibility="visible";
+          function playSound() {
+          var sound = document.getElementById("audio");
+          sound.play();
+      }
 }
-
-    
+        
+        
+        
+        function follow() {
+             var followers = document.getElementById("followdiv").getAttribute('content');
+            
+            var follow3 = Number(followers) + 1;
+            
+            var followchange2 = follow3.toString();
+            console.log(followers);
+             firebase.database().ref('/users/' + userId).update({
+                        followers: "5"
+                    });
+            
+            
+        }
+        
     </script>
-    
+
     <body>
-    <!--  <button id="signin" onclick="signin()">Sign in</button> -->
+         <meta name="viewport" content="width=device-width, initial-scale=1">
+   
+     
+<div id="demobox">
+    <div style="padding-left:16px">
+  <h2>Home Page</h2>
+  <p>Press "Create Spark" to *spark*!</p>
+    <img id="lbsquare" src="lbsquare.jpg">
+         <img id="lbsquare2" src="lbsquare2.jpg">
+</div>
+  
+ 
+
+</div>
+       
+        
+        <br><input id="inputFileToLoad" style="visibility:hidden;"type="file" onclick="showTextArea()" onchange="encodeImageFileAsURL();" />
+        <div id="imgTest" style="display:none;"></div>
+        <!--  <button id="signin" onclick="signin()">Sign in</button> -->
         <a href="index.html" class="button" id="signin">Sign in</a>
         <button id="signout" onclick="signout()">Sign out</button>
          <input type="text" placeholder="Search.."  id="searchbar">
         
-        <button id="spark" onclick="showTextArea()"> Create Spark</button><br>
+        <button id="spark" onclick="showTextArea()"  > Create Spark</button><br>
         
-        <button class="btn" id="dark" onclick="chBackcolor('white')"><i class="far fa-moon"></i></button>
+        <button class="btn" id="dark" onclick="chBackcolor('#c0deed')"><i class="far fa-moon"></i></button>
          <button class="btn" id="light" onclick="chBackcolor('rgb(30,34,39)')"><i class="fas fa-moon"></i></button>
+        <button class="btn" id="profile" onclick="location.href='profile.html';"><i class="fas fa-user"></i> </button>
+         <button class="btn" id="home" onclick="location.href='home.html';"><i class="fas fa-home"></i> </button>
         
         <img src=" https://images.vexels.com/media/users/3/143495/isolated/preview/6b80b9965b1ec4d47c31d7eccf8ce4b0-yellow-lightning-bolt-icon-by-vexels.png" id="logo">
         <img src="images/logotext.png" id="logowords">
+        <div id="musicdiv"></div>
        
-         <button type="reset" title="In some browsers, this appears as a tooltip"> 
-    <span>Cancel</span></button>
+        
+        <body>
+        
+    <div class="contain">
+        <div class="container">
+            <div class="music-player">
+                <div class="cover">
+                    <img src="https://www.grandvincent-marion.fr/_codepen/kygo.png" alt="">   
+                </div>
+                <div class="titre">
+                    <h3>Kygo</h3>
+                    <h1>Stole the show</h1>
+                </div>
+                <div class="lecteur">
+                    <audio style="width: 100%;" class="fc-media">
+                        <source src="https://www.grandvincent-marion.fr/_codepen/kygo-stole-the-show.mp3" type="audio/mp3"/>
+                    </audio>
+                </div>
+            </div>
+        </div>
+    </div>
+
+   
+<script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js'></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/mediaelement/4.2.7/mediaelement-and-player.min.js'></script>
+
+  
+
+    <script  src="js/index.js"></script>
+</body>
+        
+        
+     
         
         <style> 
+            #verified{
+               
+                height: 15px;
+                width: 15px;
+                
+            }
+            #verifieddiv{
+                position: absolute;
+                top: 230px;
+                left: 290px;
+                
+                
+            }
+             #musicdiv{
+                position: absolute;
+                top: 230px;
+                left: 290px;
+                
+                
+            }
+            #followdiv{
+            position: absolute;
+            top: 338px;
+            left: 285px;
+                font-size: 22px;
+                font-family: 'Roboto';
+                color: #6495ED;      
+            }
+             #inputFileToLoad{
+                position: absolute;
+                top: 520px;
+                left: 35px;
+                 color: #494949 !important;
+text-transform: uppercase;
+background: #ffffff;
+padding: 10px;
+border: 4px solid #0074D9 !important;
+border-radius: 50px;
+display: inline-block;
+cursor:pointer; 
+            
+                
+            }
+             #lbsquare {
+position: absolute;
+    top: 163px;
+    left: 50px;
+  width: 420px;
+  height: 110px;
+}
+            #lbsquare2 {
+position: absolute;
+    top: 263px;
+    left: 50px;
+  width: 420px;
+  height: 110px;
+}
+             .avatar {
+  vertical-align: middle;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+}
+            .avatar2 {
+  position: absolute;
+                top: 155px;
+                left: 20px;
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+}
+            #mydata2{
+            position: absolute;
+            top: 223px;
+            left: 180px;
+                font-size: 26px;
+                font-family: 'Roboto';
+        }
+            #mydata3{
+            position: absolute;
+            top: 263px;
+            left: 180px;
+                font-size: 16px;
+                font-family: 'Roboto';
+                color: 	#EE7600;
+        }
+            #followers{
+            position: absolute;
+            top: 313px;
+            left: 280px;
+                font-size: 22px;
+                font-family: 'Roboto';
+                color: #6495ED;      
+            }
+            
+          
+            #following{
+            position: absolute;
+            top: 313px;
+            left: 120px;
+                font-size: 22px;
+                font-family: 'Roboto';
+                color: #6495ED;     
+            }
             
             #textAreaDiv{
                 position: absolute;
-                top: 150px;
-                left: 500px;
+                top: 398px;
+                left: 40px;
                 
             }
             
+            
             #spark{
     display: inline-block;
-    padding: 7px 20px;
+    padding: 13px 30px;
 	border-radius: 25px;
     text-decoration: none;
     color: #FFF;
@@ -206,7 +465,7 @@ document.getElementById('textAreaDiv').style.visibility="visible";
     transition: .4s;
                 position: absolute;
                 top: 50px;
-                right:10px;
+                right:680px;
 }
 
 #spark:hover {
@@ -214,6 +473,42 @@ document.getElementById('textAreaDiv').style.visibility="visible";
     background-image: linear-gradient(45deg, #FFC107 0%, #f76a35 100%);
 }
             
+            #profile {
+  background-color: white;
+  border: #F012BE; 
+    border-color: #F012BE;
+  color: black;
+  padding: 9px 20px;
+  text-align: center;
+  font-size: 16px;
+  margin: 4px 2px;
+  opacity: 0.6;
+  transition: 0.3s;
+  display: inline-block;
+  text-decoration: none;
+  cursor:pointer;
+            position: absolute;
+            top: -4px;
+            right:220px;
+}
+            #home {
+  background-color: white;
+  border: #F012BE; 
+    border-color: #F012BE;
+  color: black;
+  padding: 9px 20px;
+  text-align: center;
+  font-size: 16px;
+  margin: 4px 2px;
+  opacity: 0.6;
+  transition: 0.3s;
+  display: inline-block;
+  text-decoration: none;
+  cursor:pointer;
+            position: absolute;
+            top: -4px;
+            left:250px;
+}
             
      #logo {
  
@@ -308,9 +603,10 @@ document.getElementById('textAreaDiv').style.visibility="visible";
 }
             
         #signin {
-  background-color: #7FFF00;
+  background-color: #1E90FF;
   border: none;
   color: white;
+font-family: 'Roboto';
   padding: 9px 16px;
   text-align: center;
   font-size: 16px;
@@ -324,14 +620,14 @@ document.getElementById('textAreaDiv').style.visibility="visible";
             top: -4px;
             right:115px;
 }
-
 #signin:hover {opacity: 1}
             
              #signout {
-  background-color: #f4511e;
+  background-color: #1E90FF;
   border: none;
   color: white;
   padding: 9px 16px;
+  font-family: 'Roboto';
   text-align: center;
   font-size: 16px;
   margin: 4px 2px;
@@ -344,13 +640,12 @@ document.getElementById('textAreaDiv').style.visibility="visible";
             top: -4px;
             right:10px;
 }
-
 #signout:hover {opacity: 1}
         </style>
         
        <style>
       #demobox {
-  background-color: #DCDCDC ;
+  background-color: #6495ED ;
           position: relative;
           width:2000px;
           top: -10px;
@@ -359,18 +654,33 @@ document.getElementById('textAreaDiv').style.visibility="visible";
  
 }</style>
     
-        <form>
-            <p id="demo"></p>
-            Tweet:<br>
+       
+            <p id="demod">  </p>
+           
          <!--   <textarea id="twit" type="text" name="thetweet" cols="100" rows="4" hidden></textarea> -->
-        </form> 
-        <div id="textAreaDiv" style="visibility:hidden;" class="divOutside"><textarea id="twit" type="text" name="thetweet" cols="70" rows="8" style="border:outset 4px orange;"></textarea></div>
-        <button type="button" onclick="tweet()">Submit</button>
+     
+        <div id="textAreaDiv" style="visibility:hidden;" class="divOutside"><textarea id="twit" type="text" name="thetweet" cols="66" rows="8" style="border:outset 4px orange;"></textarea></div>
+        <button id="duck" type="button" onclick="tweet()" style="visibility:hidden;" class="example_c">Submit</button>    
+           
+         <button  id="followchange" class="example_d" type="button" onclick="follow()">Follow</button>
+        <div id="verifieddiv"> <img src="verified.png" id="verified" ></div>
+   <!--   <button id="duck" style="visibility:hidden;"  type="button" onlick="tweet()" >Spark</button><br><br> 
+<button id="follow" type="button" onclick="follow()"  class="example_d">Follow</button> 
+-->
+    
         
     
     <div id="mytweets"></div>
     <div id="mydata"></div>
+        <div id="mydata2"></div>
+        <div id="mydata3"></div>
+          <div id="followers"></div>
+        <div id="followdiv"></div>
+          <div id="following"></div>
     <div id="myphoto"></div>
+        <div id="myphoto2"></div>
+        <h1 id="signedinas">Signed in as:</h1>
+          <script src="loudlinks.min.js"></script>
     </body>
 
     <script>
@@ -398,6 +708,89 @@ document.getElementById('textAreaDiv').style.visibility="visible";
     </script>
     
     <style>
+        
+        
+        
+        #mytweets{
+           position: absolute;
+            top: 160px;
+            left: 500px; 
+            width:50px;
+           
+        }
+        #demod{
+           position: absolute;
+            top: 130px;
+            left: 40px; 
+            font-size:  40px;
+        }
+        #myphoto{
+            position: absolute;
+            top: 50px;
+            right: 50px;
+        }
+        #myphoto2{
+            position: absolute;
+            top: 50px;
+            left: 50px;
+        }
+        #mydata{
+            position: absolute;
+            top: 109px;
+            right: 35px;
+        }
+        
+        
+        #signedinas{
+             position: absolute;
+            top: 39px;
+            right: 105px;
+        }
+        
+        
+        .example_c {
+color: #494949 !important;
+text-transform: uppercase;
+background: #ffffff;
+padding: 20px;
+border: 4px solid #01FF70 !important;
+border-radius: 50px;
+display: inline-block;
+cursor:pointer; 
+            position: absolute;
+            
+            top: 510px;
+                left: 375px;
+}
+        
+        .example_c:hover {
+color: #ffffff !important;
+background: #f6b93b;
+border-color: #f6b93b !important;
+transition: all 0.4s ease 0s;
+            border-radius: 50px;
+}
+        .example_d {
+color: #494949 !important;
+text-transform: uppercase;
+background: #ffffff;
+padding: 20px;
+border: 4px solid #6495ED !important;
+border-radius: 50px;
+display: inline-block;
+cursor:pointer; 
+            position: absolute;
+            top: 230px;
+            left: 350px;
+}
+        
+        .example_d:hover {
+color: #ffffff !important;
+background: #6495ED;
+border-color: #6495ED !important;
+transition: all 0.4s ease 0s;
+            border-radius: 50px;
+}
     
     * {
   font-family: Arial, Helvetica, san-serif;
@@ -429,7 +822,49 @@ document.getElementById('textAreaDiv').style.visibility="visible";
             opacity:0 !important;
         }
         
+        
     </style>
     
+   
+        
+
+
+    <style>
+    cart {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 270px;
+  height: 100%;
+  transform: translateX(100%);
+  background: silver;
+  transition: transform .4s ease;
+}
+
+.cart-open .cart {
+  transform: translateX(0);
+}
+
+.cart-open:before {
+  content: "";
+  position: fixed;
+  background: rgba(0, 0, 0, .85);
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+}
+
+.cart-toggle {
+  position: absolute;
+    top: 10px;
+}
+
+    </style>
+    <script>
+    $('.cart-toggle').click(function() {
+  $('.cart-container').toggleClass('cart-open');
+});
+</script>
     
 </html>
