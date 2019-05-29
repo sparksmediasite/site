@@ -1,0 +1,944 @@
+
+<html>
+    <title>Posts</title>
+ <link rel="icon" href="https://i.postimg.cc/fLW0LPLB/icon.png">
+
+ <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+    
+
+    <head><script src="jquery-3.3.1.min.js"></script>
+        <link rel="stylesheet" href="css/style.css">
+          <meta charset="UTF-8">
+         <link href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet'>
+<link rel='stylesheet' href='http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css'>
+<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/mediaelement/4.2.7/mediaelementplayer.min.css'>
+
+        <link href="https://fonts.googleapis.com/css?family=Raleway" rel="stylesheet">
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/open-iconic-bootstrap.min.css">
+    <link rel="stylesheet" href="css/icomoon.css">
+    <link rel="stylesheet" href="css/style.css">
+
+     
+    </head>
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
+
+    <script src="https://www.gstatic.com/firebasejs/5.8.5/firebase.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    
+<audio id="audio" src="noise.mp3" autoplay="false" ></audio>
+    <style>
+        tr:hover {background-color: #6495ED;}
+        th, td {
+            border-bottom: 0px solid #ddd;
+            border-left: solid 0px #92DFF3;
+            border-radius: 25px;
+            
+        }
+        table{
+            border-radius: 25px;
+            border: solid 1px #1E90FF;
+        }
+        body{
+            background-color: #c0deed;
+        }
+      
+    
+    </style>
+    <script src="moment.js"></script>
+    <script>
+        
+        // Initialize Firebase
+       var config = {
+    apiKey: "AIzaSyBB96FhW5NPDb2Tfq27FjRAAbLRK1M-APA",
+    authDomain: "test-7881c.firebaseapp.com",
+    databaseURL: "https://test-7881c.firebaseio.com",
+    projectId: "test-7881c",
+    storageBucket: "test-7881c.appspot.com",
+    messagingSenderId: "508423391002"
+  };
+  firebase.initializeApp(config);
+                
+        // Check to see if you are logged in
+        firebase.auth().onAuthStateChanged(function(user) {
+            if (user == null) {
+                alert("Not logged in.");
+                return;
+            } else {
+                userId = user.uid;
+                name = user.displayName;
+                imageUrl = user.photoURL;
+                email = user.email;
+                    
+                // write user data to users
+                //writeUserData(userId, name, email, imageUrl);
+                // moved to tweet function
+               
+                // write data to document
+                mydiv = document.getElementById("mydata");
+                mydiv.innerHTML = name
+                  mydiv3 = document.getElementById("mydata3");
+                mydiv3.innerHTML = "@" + name
+                mydiv4 = document.getElementById("followers");
+                mydiv4.innerHTML = "Followers:" + "<br>" + followers;
+                mydiv5 = document.getElementById("following");
+                mydiv5.innerHTML = "Following:" + "<br>" + "4"
+                myphotodiv = document.getElementById("myphoto");
+                myphotodiv.innerHTML = "<img src='" + imageUrl + "'class='avatar'/>";
+                myphotodiv2 = document.getElementById("myphoto2");
+                
+                
+               
+                
+                firebase.database().ref('/tweets').once('value').then(function(snapshot) {
+                    var data = (snapshot.val());
+                    if (data == null) {
+                      console.log("No data found at /tweets/" + userId);  
+                    } else {
+                        
+                      firebase.database().ref('/users').once('value').then(function(snapshot) { 
+                        var userdata = (snapshot.val());
+                        if (userdata != null) {
+                           dataarray = [data,userdata]
+                           console.log(dataarray)
+                           updatetweets(dataarray); 
+                              
+                           
+                        }
+                      });
+                      //console.log(data)
+                      //updatetweets(data);
+                    }
+                });
+            } // end user null check
+        }); // end check auth state
+        
+        
+        function encodeImageFileAsURL() {
+
+            var filesSelected = document.getElementById("inputFileToLoad").files;
+            if (filesSelected.length > 0) {
+                var fileToLoad = filesSelected[0];
+                var fileReader = new FileReader();
+                fileReader.onload = function(fileLoadedEvent) {
+                    var srcData = fileLoadedEvent.target.result; // <--- data: base64
+                    //var newImage = document.createElement('img');
+                    //newImage.src = srcData;
+                    //document.getElementById("imgTest").innerHTML = newImage.outerHTML;
+                    document.getElementById("imgTest").innerHTML = srcData;
+                    //console.log("Converted Base64 version is: " + document.getElementById("imgTest").innerHTML);
+                    console.log(srcData);
+                }
+                fileReader.readAsDataURL(fileToLoad);
+            }
+        } // end function
+        
+        // write user data
+        function writeUserData(userId, name, email, imageUrl) {
+            firebase.database().ref('users/' + userId).once('value',    function(snapshot) {
+                 if (!snapshot.exists()) {
+                    firebase.database().ref('users/' + userId).set({
+                        username: name,
+                        email: email,
+                        profile_picture : imageUrl
+                    }); 
+                 }                                      
+            });
+        }
+        
+        
+        
+        function updatetweets(data) {
+            //var mylist = "<ul>";
+            var mytab = "<div id='scrolltable'> <table border-radius='25'";
+            users = data[1]; // put on top, because changed data - not good coding change later
+            data = data[0];
+            count = 0;
+            for (var u in data) {
+                for (var t in data[u]) {
+                    mytab = mytab + "<tr>";
+                    var date = (data[u][t].time);
+                    
+                     
+                
+                  //  var time = date.toString();
+                    if (data[u][t].img != "") {
+                        mytab = mytab + "<td><img src='" + users[u].profile_picture + "' class='avatar' width='50px'></td>";
+                        mytab = mytab + "<td>"  + "<div style='font-family: Roboto; color: #cc7000; font-size: 18px;'> " +  users[u].email + " " + "<a href='profile.html?uid=" + users[u].email + "&name=" + users[u].username + "&pic=" + users[u].profile_picture + "&bio=" + users[u].bio  +  "'>" + "profile" + "</a>" + "" + "     "  + "Likes:" + "   " + "<button id='like" + count + "' onclick=addLike(" + count + ",'" + u + "'," + "'" + t + "'" +  ")>" + data[u][t].likes + "</button>" + "</div>" + "<br>" + "<br>" + "<div style='font-family: Roboto; color: #0074D9;'> " + data[u][t].tweet + "</div>" + "<br>" + "<br>" + "</td>";
+                    //    font-family: 'Roboto';
+                      //  mytab = mytab + "<td>" + data[u][t].tweet + "</td>";
+                        mytab = mytab + "<td>" + "<div style='font-family: Roboto; color: #6495ED; font-size: 13px;'> " + date + "</div>" + "<br>" + "<img src='" + data[u][t].img + "' width='180px' height='150px'>" + "<br>" + "<br>" + "</td>";
+                    } else {
+                        mytab = mytab + "<td><img src='" + users[u].profile_picture + "' ' class='avatar' width='50px'></td>";
+                        mytab = mytab + "<td>"  + "<div style='font-family: Roboto; color: #cc7000; font-size: 18px;'> " +  users[u].email + " " + "<a href='profile.html?uid=" + users[u].email + "&name=" + users[u].username + "&pic=" + users[u].profile_picture + "&bio=" + users[u].bio +  "'>" + "profile" + "</a>" + "" + "     "  + "Likes:" + "   " + "<button id='like" + count + "' onclick=addLike(" + count + ",'" + u + "'," + "'" + t + "'" +  ")>" + data[u][t].likes + "</button>" + "</div>" + "<br>" + "<br>" + "<div style='font-family: Roboto; color: #0074D9;'> " + data[u][t].tweet  + "</div>" + "<br>" + "<br>" + "<br>"  + "<br>" + "</td>";
+                     //  mytab = mytab + "<td>" + data[u][t].tweet + "</td>";
+                        mytab = mytab + "<td>" + "<div style='font-family: Roboto; color: #6495ED; font-size: 13px;'> " + date + "</div>" + "</td>";
+                        
+                     // 
+                    } 
+                    mytab = mytab + "</tr>";
+                    count = count + 1;
+                    
+                    //"," + t + "," + u +
+                    
+                    //", " + u + ", " + t +
+                }   
+            }
+            
+            //mylist = mylist + "</ul>";
+            mytab = mytab + "</table></div>"
+            var mytdiv = document.getElementById("mytweets");
+            console.log(mytab);
+            //mytdiv.innerHTML = mylist;
+            mytdiv.innerHTML = mytab;
+            
+           
+        }
+        
+        // push data to firebase
+        
+        function addLike(count,u,t){
+        var mybutt = document.getElementById("like" + count);
+           
+            var existing = Number(mybutt.innerHTML);
+            console.log(existing + 1);
+            
+          var dope =  existing + 1;
+            mybutt.innerHTML = dope;
+            mybutt.disabled = true;
+            console.log(u);
+            console.log(count);
+            
+                  //      var data = (snapshot.val());
+                    //   var tKeys = Object.keys(data);
+             //   console.log(tKeys);
+               // console.log(existing);
+                firebase.database().ref('tweets/' + u + "/" + t).update({likes: dope});
+                        
+                      };
+            
+            
+        
+        
+        
+        
+        function tweet() {
+            
+
+            var twitdoc = document.getElementById("twit");
+            var twitimg = document.getElementById("imgTest");
+            var nameValue = twitdoc.value;
+            var imgValue = twitimg.innerHTML;
+
+            var js_time = moment().format('LLL');
+            var tweetid = firebase.database().ref('tweets/' + userId + "/").push({tweet: nameValue, time: js_time, img: imgValue, likes: 0});
+            twitdoc.value = "";
+            writeUserData(userId, name, email, imageUrl);
+            console.log("tweet written")
+            
+            firebase.database().ref('/tweets').once('value').then(function(snapshot) {
+                    var data = (snapshot.val());
+                    if (data == null) {
+                      console.log("No data found at /tweets/" + userId);  
+                    } else { 
+                        firebase.database().ref('/users').once('value').then(function(snapshot) { 
+                        var userdata = (snapshot.val());
+                        if (userdata != null) {
+                           dataarray = [data,userdata]
+                           console.log(dataarray)
+                           updatetweets(dataarray); 
+                        }
+                      });
+                    }
+                });
+            
+            
+            
+            // The unique key stored in tweetid is based on a timestamp, so list items will automatically be ordered chronologically. Because Firebase generates a unique key for each tweet, no write conflicts will occur if multiple users add a post at the same time. https://firebase.google.com/docs/database/admin/save-data
+            
+        }
+        
+        function signin() {
+            console.log("Signing in");
+            var provider = new firebase.auth.GoogleAuthProvider();
+            firebase.auth().signInWithRedirect(provider).then(function(result) { 
+                window.location.replace("home.html");
+            });
+        }
+        
+        function signout() {
+            console.log("Signing out");
+            firebase.auth().signOut().then(function() {
+            });
+        }
+        
+          
+        
+             function load_home() {
+     document.getElementById("musicdiv").innerHTML='<object type="text/html" data="mp/index.html" ></object>';
+}
+            
+            
+        
+        
+        
+        
+         function chBackcolor(color) {
+   document.body.style.background = color;
+}
+
+      function showTextArea() {
+document.getElementById('textAreaDiv').style.visibility="visible";
+          document.getElementById('inputFileToLoad').style.visibility="visible";
+          document.getElementById('duck').style.visibility="visible";
+          function playSound() {
+          var sound = document.getElementById("audio");
+          sound.play();
+      }
+}
+        
+        
+        
+        
+        
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js'></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/mediaelement/4.2.7/mediaelement-and-player.min.js'></script>
+
+  
+
+    <script  src="js/index.js"></script>
+
+    <body>
+         <meta name="viewport" content="width=device-width, initial-scale=1">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark probootstrap-navabr-dark">
+        <div class="container">
+          <a class="navbar-brand" href="index.html">Spark</a>
+          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#probootstrap-nav" aria-controls="probootstrap-nav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+             <button id="signout" onclick="signout()">ConOut</button>
+      <div class="collapse navbar-collapse" id="probootstrap-nav">
+            <ul class="navbar-nav ml-auto">
+              <li class="nav-item"><a href="frenchacceuil.html" class="nav-link">Acceuil</a></li>
+              <li class="nav-item"><a href="frenchpostnow.html" class="nav-link">Posts</a></li>
+              <li class="nav-item"><a href="frenchprofil.html" class="nav-link">Profil</a></li>
+             <li class="nav-item"><a href="frenchpostnowrain.html" class="nav-link">Rain</a></li>
+
+               
+                <li class="nav-item probootstrap-seperator"> <a href="postnow.html" class="nav-link">English</a></li>
+                <li class="nav-item"><a href="frenchpostnow.html" class="nav-link">Français</a></li>
+                 <li class="nav-item probootstrap-seperator"><a href="https://alenniu.github.io/music/music-player-audio-player/" class="nav-link">Musique</a></li>
+              
+                
+                
+            
+              <li class="nav-item probootstrap-cta probootstrap-seperator"><a href="frenchlogin.html" class="nav-link">Enregistrer</a></li>
+              <li class="nav-item probootstrap-cta"><a href="frenchlogin.html" class="nav-link">Connexion</a></li>
+            </ul>
+           
+          </div>
+        </div>
+      </nav>
+
+     <section class="probootstrap-cover">
+      <div class="container">
+        <div class="row probootstrap-vh-75 align-items-center text-left">
+          <div class="col-sm">
+            <div class="probootstrap-text pt-5">
+              <h1 class="probootstrap-heading text-white mb-4">Poster Maintenant </h1>
+              <div class="probootstrap-subheading mb-5">
+                <p class="h4 font-weight-normal">Veuillez cliquer sur Spark pour commencer</p>
+                  <br>
+                  <button type="button" onclick="tweet()" class="btn btn-primary mr-2 mb-2">Spark</button>    
+                 
+           
+                  
+                  
+              </div>
+                
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+      
+
+    <section class="probootstrap-section">
+      <div class="container">
+        <div class="row">
+          <div class="col-md-7 pr-md-5 pr-0">
+            <h2 class="mb-5">Sparks Récents</h2>
+           
+          </div>
+          <div class="col-md-5">
+            <div id="mytweets"></div>
+              
+            </div>
+
+          </div>
+        </div>
+    </section>
+
+    <section class="probootstrap-section probootstrap-section-feature pb-0 probootstrap-overflow-hidden">
+      <div class="container">
+        <div class="row">
+          <div class="col-md-6 pl-md-5 pb-5 order-md-2 order-1">
+            <h2 class="mb-4 display-5 probootstrap-heading">Fonctionnalités</h2>
+            <div class="probootstrap-item mb-4">
+              <h3>Profil</h3>
+              <p>Créez votre page-profil personalisible pour réfleter votre caractère en line.</p>
+            </div>
+            <div class="probootstrap-item mb-4">
+              <h3>Sparks</h3>
+              <p>Initiez des Sparks pour partager ce que vous voulez dire, et exprimez votre voix au monde.</p>
+            </div>
+            <div class="probootstrap-item mb-4">
+              <h3>Pièce Joints Mediatiques</h3>
+              <p>Attachez n'importe quoi (ce doit être un fichier visuel et affichable) à vos Sparks, en partagent tous vos mémoires et médias. </p>
+            </div>
+            <div class="probootstrap-item mb-4">
+              <h3>Mises à Jour Orientés aux Utilisateurs</h3>
+              <p>En publiant des nouvelles mises à jour améliorés à le site Spark fréquemment, notre site est sculpté parfaitement pour les besoins de nos cibles.</p>
+            </div>
+          </div>
+
+          <div class="col-md-6 pr-md-5 order-md-1 order-2">
+            <div class="probootstrap-device">
+              <img src="images/phone_3.png" alt="Free Bootstrap 4 Template by uicookies.com" class="img-fluid mb-md-0 mb-5">
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <section class="probootstrap-section">
+      <div class="container">
+        <div class="row">
+          <div class="col-lg">
+            <div class="media mb-md-0 mb-3">
+              <div class="probootstrap-icon"><span style="color:#3492E3;" class="icon-man display-4"></span></div>
+              <div class="media-body">
+                <h5 class="mt-0">Nathan Chong</h5>
+                <p>Cofondateur</p>
+                    <div style="font-size:12px;">Cliquez 
+                        <a href=mailto:nathan.chong@ucc.on.ca?subject=Inquiry><u style="font-size:12px; color:#3492E3;">ici</u></a> pour nous contacter par e-mail.
+                  ` </div>
+                  </p>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg">
+            <div class="media mb-md-0 mb-3">
+              <div class="probootstrap-icon"><span style="color:#3492E3;" class="icon-man display-4"></span></div>
+              <div class="media-body">
+                <h5 class="mt-0">Alen Niu</h5>
+                <p>Cofondateur<br>
+                     <div style="font-size:12px;">Cliquez 
+                        <a href=mailto:alen.niu@ucc.on.ca?subject=Inquiry><u style="font-size:12px; color:#3492E3;">ici</u></a> pour nous contacter par e-mail.
+                  ` </div>
+                </p>
+                  
+              </div>
+            </div>
+          </div>
+          <div class="col-lg">
+            <div class="media mb-md-0 mb-3">
+              <div class="probootstrap-icon"><span style="color:#3492E3;" class="icon-clock display-4"></span></div>
+              <div class="media-body">
+                <h5 class="mt-0">Mr. Hoel</h5>
+                <p>Cadre </p>
+                    <div style="font-size:12px;">Cliquez 
+                        <a href=mailto:mhoel@ucc.on.ca?subject=Inquiry><u style="font-size:12px; color:#3492E3;">ici</u></a> pour nous contacter par e-mail. 
+                  ` </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="probootstrap-footer">
+      <div class="container">
+        <div class="row mb-5">
+          <div class="col-md-8">
+            <div class="row">
+              <div class="col-lg mb-4"><h2 class="probootstrap-heading"><a href="#">Spark</a></h2></div>
+              <div class="col-lg">
+                <div class="probootstrap-footer-widget mb-4">
+                  <h2 class="probootstrap-heading-2">Liens d'UCC</h2>
+                  <ul class="list-unstyled">
+                    <li><a href="https://www.ucc.on.ca/" class="py-2 d-block">Site Officiel</a></li>
+                    <li><a href="https://ucc.learning.powerschool.com/" target="_blank" class="py-2 d-block">PowerSchool</a></li>
+                    <li><a href="https://ucc.managebac.com/login" target="_blank" class="py-2 d-block">ManageBac</a></li>
+                    <li><a href="https://www.ucc.on.ca/page/athletics/ucc-teams" target="_blank" class="py-2 d-block">Sportifs</a></li>
+                  </ul>
+                </div>
+              </div>
+              <div class="col-lg">
+                 <div class="probootstrap-footer-widget mb-4">
+                  <h2 class="probootstrap-heading-2">Liens Vites</h2>
+                  <ul class="list-unstyled">
+                    <li><a href="https://google.fr/" target="_blank" class="py-2 d-block">Google</a></li>
+                    <li><a href="https://www.youtube.com/?gl=FR&hl=fr" target="_blank" class="py-2 d-block">Youtube</a></li>
+                    <li><a href="https://www.instagram.com/?hl=fr" target="_blank" class="py-2 d-block">Instagram</a></li>
+                    <li><a href="http://www.espn.com/" target="_blank" class="py-2 d-block">ESPN</a></li>
+                  </ul>
+                </div>
+              </div>
+              <div class="col-lg">
+                 <div class="probootstrap-footer-widget mb-4">
+                  <h2 class="probootstrap-heading-2">Information</h2>
+                  <ul class="list-unstyled">
+                    <li><a href="https://github.com/sparksmediasite/site/wiki" target="_blank" class="py-2 d-block">Acceuil de Wiki</a></li>
+                    <li><a href="https://github.com/sparksmediasite/site/wiki/Ignite:-Sprint-Backlog" target="_blank" class="py-2 d-block">Sprint "Ignite"</a></li>
+                    <li><a href="https://github.com/sparksmediasite/site/wiki/Charge:-Sprint-Backlog" target="_blank" class="py-2 d-block">Sprint "Charge"</a></li>
+                    <li><a href="https://docs.google.com/presentation/d/1zFHOTtiP2uDDwKOlTVCNkvjO-fAnZQxhGullHDpYbbQ/edit?usp=sharing" target="_blank" class="py-2 d-block">Synthèse d'Enterprise</a></li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="probootstrap-footer-widget mb-4">
+              <ul class="probootstrap-footer-social list-unstyled float-md-right float-lft">
+                
+                <li><a href="https://github.com/sparksmediasite/site/wiki" target="_blank"><span class="icon-github"></span></a></li>
+                  <li><a href="https://www.instagram.com/nate.chong/" target="_blank"><span class="icon-instagram"></span></a></li>
+                <li><a href="https://www.instagram.com/chalen21/" target="_blank"><span class="icon-instagram"></span></a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md text-left">
+            <ul class="list-unstyled footer-small-nav">
+              <li><a href="#">Legal</a></li>
+              <li><a href="#">Privacy</a></li>
+              <li><a href="#">Cookies</a></li>
+              <li><a href="#">Terms</a></li>
+              <li><a href="#">About</a></li>
+            </ul>
+          </div>
+          <div class="col-md text-md-right text-left">
+            <p><small>&copy; Unlock 2017. All Rights Reserved. <br> Made with <span class="icon-heart"></span> by <a href="https://uicookies.com/">uiCookies</a> <br> Demo Images: Unsplash</small></p>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+
+    <script src="js/jquery-3.2.1.slim.min.js"></script>
+    <script src="js/popper.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/main.js"></script>
+    
+   
+     
+
+       
+        
+        <br><input id="inputFileToLoad" type="file" onclick="showTextArea()" onchange="encodeImageFileAsURL();" />
+        <div id="imgTest" style="display:none;"></div>
+        <!--  <button id="signin" onclick="signin()">Sign in</button> -->
+        
+       
+        
+      
+       
+        
+        <body>
+        
+   
+   
+<script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js'></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/mediaelement/4.2.7/mediaelement-and-player.min.js'></script>
+
+  
+
+    <script  src="js/index.js"></script>
+</body>
+        
+        
+     
+        
+        <style> 
+            #scrolltable { margin-top: 20px; height: 400px; overflow: auto; }
+#scrolltable table { border-collapse: collapse; }
+#scrolltable tr:nth-child(even) { background: #D8BFD8; }
+#scrolltable th div { position: absolute; margin-top: -20px; }
+          
+             #inputFileToLoad{
+                position: absolute;
+                top: 330px;
+                left: 290px;
+                 color: #494949 !important;
+text-transform: uppercase;
+background: #ffffff;
+padding: 10px;
+border: 4px solid #0074D9 !important;
+border-radius: 50px;
+display: inline-block;
+cursor:pointer; 
+            
+            }
+            
+              .avatar {
+  vertical-align: middle;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+}
+            .avatar2 {
+  position: absolute;
+                top: 155px;
+                left: 20px;
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+}
+            #textAreaDiv{
+                position: absolute;
+                top: 398px;
+                left: 160px;
+                
+            }
+            
+            
+            #spark{
+    display: inline-block;
+    padding: 13px 30px;
+	border-radius: 25px;
+    text-decoration: none;
+    color: #FFF;
+    background-image: -webkit-linear-gradient(45deg, #FFC107 0%, #ff8b5f 100%);
+    background-image: linear-gradient(45deg, #FFC107 0%, #ff8b5f 100%);
+    transition: .4s;
+                position: absolute;
+                top: 50px;
+                right:680px;
+}
+
+#spark:hover {
+    background-image: -webkit-linear-gradient(45deg, #FFC107 0%, #f76a35 100%);
+    background-image: linear-gradient(45deg, #FFC107 0%, #f76a35 100%);
+}
+            
+            
+        </style>
+        
+       <style>
+      #demobox {
+  background-color: #6495ED ;
+          position: relative;
+          width:2000px;
+          top: -10px;
+          left:-10px;
+  padding: 19px ;
+ 
+}</style>
+    
+       
+            <p id="demod">  </p>
+           
+         <!--   <textarea id="twit" type="text" name="thetweet" cols="100" rows="4" hidden></textarea> -->
+     
+        <textarea placeholder="Veuillez taper votre Spark ici" rows="7" name="comment[text]" id="twit" cols="40" class="ui-autocomplete-input" autocomplete="off" role="textbox" aria-autocomplete="list" aria-haspopup="true"></textarea>
+           <style>
+        textarea {
+  position: absolute;
+            top: 398px;
+            left: 160px;
+  -moz-border-bottom-colors: none;
+  -moz-border-left-colors: none;
+  -moz-border-right-colors: none;
+  -moz-border-top-colors: none;
+  background: none repeat scroll 0 0 rgba(0, 0, 0, 0.07);
+  border-color: -moz-use-text-color #FFFFFF #FFFFFF -moz-use-text-color;
+  border-image: none;
+  border-radius: 6px 6px 6px 6px;
+  border-style: none solid solid none;
+  border-width: medium 1px 1px medium;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12) inset;
+  color: #555555;
+  font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+  font-size: 1em;
+  line-height: 1.4em;
+  padding: 5px 8px;
+  transition: background-color 0.2s ease 0s;
+}
+               
+               
+textarea:focus {
+    background: none repeat scroll 0 0 #FFFFFF;
+    outline-width: 0;
+}
+        </style>
+        
+   <!--   <button id="duck" style="visibility:hidden;"  type="button" onlick="tweet()" >Spark</button><br><br> 
+<button id="follow" type="button" onclick="follow()"  class="example_d">Follow</button> 
+-->
+    
+        
+    
+    
+    <div id="mydata"></div>
+        <div id="mydata2"></div>
+        <div id="mydata3"></div>
+          <div id="followers"></div>
+        <div id="followdiv"></div>
+          <div id="following"></div>
+    <div id="myphoto"></div>
+        <div id="myphoto2"></div>
+        <h1 id="signedinas">Connecté comme:</h1>
+          <script src="loudlinks.min.js"></script>
+    </body>
+
+    <script>
+        
+    $(document).ready(function() {
+	$("#twit").emojioneArea({
+  	
+		pickerPosition: "right",
+    	tonesStyle: "bullet",
+		events: {
+         	keyup: function (editor, event) {
+           		console.log(editor.html());
+           		console.log(this.getText());
+        	}
+    	}
+	});
+  
+     $('#textAreaDiv').click(function () {
+                $('.emojionearea-button').click()
+            })
+            
+            
+});
+    
+    </script>
+    
+    <style>
+        
+        
+        
+       
+        #demod{
+           position: absolute;
+            top: 130px;
+            left: 40px; 
+            font-size:  40px;
+        }
+        #myphoto{
+            position: absolute;
+            top: 220px;
+            right: 350px;
+        }
+        #myphoto2{
+            position: absolute;
+            top: 50px;
+            left: 50px;
+        }
+        #mydata{
+            position: absolute;
+            top: 220px;
+            right: 230px;
+            font-size: 30px;
+            color:bisque;
+        }
+        
+        
+        
+        #signedinas{
+             position: absolute;
+            top: 80px;
+            right: 105px;
+        }
+          #mydata2{
+            position: absolute;
+            top: 223px;
+            left: 180px;
+                font-size: 26px;
+                font-family: 'Roboto';
+        }
+            #mydata3{
+            position: absolute;
+            top: 263px;
+            left: 1100px;
+                font-size: 16px;
+                font-family: 'Roboto';
+                color: 	#EE7600;
+        }
+            #followers{
+            position: absolute;
+            top: 313px;
+            left: 1180px;
+                font-size: 22px;
+                font-family: 'Roboto';
+                color: #6495ED;      
+            }
+            
+          
+            #following{
+            position: absolute;
+            top: 313px;
+            left: 1000px;
+                font-size: 22px;
+                font-family: 'Roboto';
+                color: #6495ED;     
+            }
+        
+        
+        
+    
+    * {
+  font-family: Arial, Helvetica, san-serif;
+}
+.row:after, .row:before {
+  content: " ";
+  display: table;
+  clear: both;
+}
+.span6 {
+  float: left;
+  width: 48%;
+  padding: 1%;
+}
+
+.emojionearea-standalone {
+  float: right;
+}
+
+ .divOutside {
+            height: 20px;
+            width: 20px;
+            background-position: -1px -26px;
+            background-repeat: no-repeat;
+            background-image: url(data:image/png;base64,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);
+        }
+        .emojionearea-button
+        {
+            opacity:0 !important;
+        }
+        
+        
+    </style>
+    
+   
+        
+
+
+    <style>
+    cart {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 270px;
+  height: 100%;
+  transform: translateX(100%);
+  background: silver;
+  transition: transform .4s ease;
+}
+
+.cart-open .cart {
+  transform: translateX(0);
+}
+
+.cart-open:before {
+  content: "";
+  position: fixed;
+  background: rgba(0, 0, 0, .85);
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+}
+
+.cart-toggle {
+  position: absolute;
+    top: 10px;
+}
+
+    </style>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/mo-js/0.288.2/mo.min.js'></script>
+    <script>
+    $('.cart-toggle').click(function() {
+  $('.cart-container').toggleClass('cart-open');
+});
+        
+        console.clear();
+
+const pop = new mojs.Shape({
+	fill: 'none',
+	stroke: {'#27ae60':'#c0392b'},
+	radius: {0:80},
+	strokeWidth: {8:0},
+	opacity: {1:0},
+	duration: 1000
+});
+
+const burst = new mojs.Burst({
+	radius: {0:100},
+	angle: {0:100, easing: 'cubic.out'},
+	count: 25,
+	children: {
+		radius: {0:10},
+		shape: 'circle',
+		fill: {'#fff':'#8e44ad'},
+		duration: 800
+	}
+});
+
+const spark = new mojs.Burst({
+	radius: {0:150},
+	angle: {0: -60},
+	count: 10,
+	children: {
+		shape: 'line',
+		stroke: {'#d35400':'#e67e22'},
+		strokeWidth: {5:2},
+		duration: 800
+	}
+});
+
+const lines = new mojs.Burst({
+	radius: {50:150},
+	count: 10,
+	children: {
+		shape: 'line',
+		stroke: '#222',
+		strokeWidth: 4,
+		opacity: {1:0},
+		duration: 1000
+	}
+});
+
+
+const triangles = new mojs.Burst({
+	radius: {50:150},
+	angle: {0: 120},
+	count: 15,
+	children: {
+		shape: 'polygon',
+		points: 3,
+		fill: '#16a085',
+		duration: 1500
+	}
+});
+
+var animArr = [];
+animArr.push(pop, burst, spark, triangles, lines);
+
+
+addEventListener('mousedown', (e) => {
+	animArr.forEach(anim => {
+		anim.el.style.top = 0;
+		anim.el.style.left = 0;
+		anim.tune({x: e.x, y: e.y}).replay();
+	})
+})
+</script>
+    
+</html>
+
